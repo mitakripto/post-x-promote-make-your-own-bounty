@@ -28,8 +28,16 @@ try {
 }
 
 const post = JSON.parse(bytes.toString('utf-8'));
-if (typeof post.url !== 'string' || !post.url.startsWith('https://x.com/')) {
-  console.error('POST.json does not name an x.com post address');
+if (typeof post.url !== 'string') {
+  console.error('POST.json does not name a post address');
+  process.exit(1);
+}
+// The gate reads the address as https://x.com/<handle>/status/<id> (or the
+// same on twitter.com), id digits only, so refuse anything shaped otherwise
+// instead of handing a bad address to /output.
+const POST_ADDRESS = /^https:\/\/(x\.com|twitter\.com)\/[A-Za-z0-9_]+\/status\/[0-9]+$/;
+if (!POST_ADDRESS.test(post.url)) {
+  console.error(`POST.json does not name an X post address: ${post.url}`);
   process.exit(1);
 }
 
